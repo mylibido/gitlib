@@ -1,10 +1,9 @@
-% clear
-function [X,SVMModel]=amysvm_spk()
-win=[201 600;601 950];
-str='i:\160720';
-load([str '\Blksortedcell']);
-load([str '\BlkCSF_unsorted']);
-load([str '\BlkNEUF_unsorted']);
+function [X,Y,ranidx,SVMModel,score1,score2,pfm]=amysvm_spk(destination)
+win=[201 600;601 1000];
+% destination='i:\160720';
+load([destination '\Blksortedcell']);
+load([destination '\BlkCSF_unsorted']);
+load([destination '\BlkNEUF_unsorted']);
 %% 旧版 做不出来
 % Nsession=2;
 % y=repmat([ones(30,1);zeros(90,1)],Nsession,1);
@@ -72,7 +71,7 @@ load([str '\BlkNEUF_unsorted']);
 % sum(label)
 %% 新版 向量化 block based
 ss=zeros(3,8);
-Nused=20;
+Nused=10;
 for iii=1:numel(Blksortedcell)
     ss=ss+Blksortedcell{iii};
 end
@@ -86,7 +85,8 @@ Y=repmat([1 1 1 0 0 0],1,size(X,1)/6);
 ranidx=randperm(numel(Y))<numel(Y)/2+1;
 SVMModel=fitcsvm(X(ranidx,:),Y(ranidx),'KernelScale','auto','Standardize',true,...
     'OutlierFraction',0.05,'KernelFunction','RBF');
-label=predict(SVMModel,X(~ranidx,:));
+[lb,score1]=predict(SVMModel,X(~ranidx,:));
+[label,score2]=predict(SVMModel,X(~ranidx,:));
 pfm=sum(label==Y(~ranidx)')
 sprintf([num2str(pfm) '/' num2str(numel(Y(~ranidx)))])
 function [c]=unit_merge_feature(a,b,win)

@@ -1,10 +1,9 @@
 % clear
-function [spec,X,SVMModel]=amysvm_lfp()
-wins=[201 600];
-str='i:\160721';
-load([str '\Blksortedcell']);
-load([str '\Amy_unit_block_conLFP.mat']);
-load([str '\Amy_unit_block_oriLFP.mat']);
+function  [X,Y,ranidx,SVMModel,score1,score2,pfm]=amysvm_lfp(destination)
+% destination='i:\160721';
+load([destination '\Blksortedcell']);
+load([destination '\Amy_unit_block_conLFP.mat']);
+load([destination '\Amy_unit_block_oriLFP.mat']);
  %%
 %spike based svm 做不出来
 %  load([str '\BlkCSF_unsorted']);
@@ -139,7 +138,8 @@ Y=repmat([1;0],size(X,1)/2,1);
 ranidx=randperm(numel(Y))<numel(Y)*0.5+1;
 SVMModel=fitcsvm(X(ranidx,:),Y(ranidx),'KernelScale','auto','Standardize',true,...
     'OutlierFraction',0.05,'KernelFunction','RBF');
-label=predict(SVMModel,X(~ranidx,:));
+[lb,score1]=predict(SVMModel,X(ranidx,:));
+[label,score2]=predict(SVMModel,X(~ranidx,:));
 pfm=sum(label==Y(~ranidx))
 sprintf([num2str(pfm) '/' num2str(numel(Y(~ranidx)))])
 %% 画每个block lfp能量图
